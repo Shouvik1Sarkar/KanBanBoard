@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { userRolesEnum, userRolesObject } from "../utils/constants.utils.js";
+import bcrypt from "bcryptjs";
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -92,3 +93,11 @@ const userSchema = new mongoose.Schema(
 );
 
 export const User = mongoose.model("User", userSchema);
+
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    return next();
+  }
+  this.password = await bcrypt.hash(this.password, 10);
+  return next();
+});
